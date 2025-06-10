@@ -22,7 +22,7 @@ import torch
 from transformers import pipeline, set_seed, AutoConfig
 from transformers import Conversation
 from transformers import AutoModelForCausalLM, AutoTokenizer, LlamaForCausalLM, LlamaTokenizer
-from accelerate import infer_auto_device_map, init_empty_weights, load_checkpoint_and_dispatch
+
 torch.cuda.empty_cache()
 
 # device = torch.device('cuda:0')
@@ -210,7 +210,7 @@ class GeneratorModel:
             else:
                 generator_prompt = self.system_prompt + '\n' + generator_prompt + '\n'
             # print('mobile prompt:', generator_prompt)
-            command = f'/mnt/disk4/xy/MobileLLM/llama-cli -m \"{self.model_name_or_path}\" -p \"{generator_prompt}\" -n {self.max_new_tokens} -c 4096 --temp 0.1 -t 40 --skip-system-prompt' 
+            command = f'/mnt/disk4/xy/MobileLLM/llama-cli -m \"{self.model_name_or_path}\" -p \"{generator_prompt}\" -n {self.max_new_tokens} -c 4096 --temp 0.1 --skip-system-prompt' 
             print('command:', command)
             os.system(command)
             output_str = os.popen(command).read()
@@ -233,7 +233,7 @@ class GeneratorModel:
                 max_new_tokens=self.max_new_tokens,
             )
             res = response[0]["generated_text"][-1]
-            print('response:', res)
+            # print('response:', res)
 
         else:
         # Generate a response using the conversational pipeline
@@ -244,7 +244,7 @@ class GeneratorModel:
 
         # Extract the generated response
             res = response.generated_responses[-1]
-            print('response:', res)
+            # print('response:', res)
         return res
 
     def add_system_prompt(self, prompt):
@@ -340,7 +340,7 @@ class Benchmark:
 
     def generate_responses_for_question(self, generator_model, question_str, options, answer_idx):
         generator_response_str = generator_model.run(question_str, options)
-        print('generator_response_str:', generator_response_str)
+        # print('generator_response_str:', generator_response_str)
         response = {
             'question_str': question_str,
             'options': options,
@@ -394,7 +394,7 @@ class Experiment:
 
     def generate(self):
         self.response = self.benchmark.generate_responses(self.generator_model)
-        print('response:', self.response)
+        # print('response:', self.response)
         return(True)
 
     def evaluate(self):
