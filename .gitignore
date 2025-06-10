@@ -192,3 +192,12 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# file
+LiveQA_MedicalTask_TREC2017/
+MMLU/
+MedMCQA/
+MedQA/
+*mobile*.txt
+pubmedqa/
+results/

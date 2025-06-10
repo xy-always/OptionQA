@@ -7,3 +7,6 @@
     bash run_mmlu_medical_genetics.sh
     bash run_mmlu_professional_medicine.sh
     bash run_medmcqa.sh
+2. WSY 跑
+    1. 修改模型地址
+    2. bash run_icliniq.sh
