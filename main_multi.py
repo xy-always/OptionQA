@@ -13,8 +13,8 @@ import openai
 from openai import OpenAI
 import tiktoken
 
-from litellm import completion
-from litellm.exceptions import BadRequestError
+# from litellm import completion
+# from litellm.exceptions import BadRequestError
 from together import Together
 from data_util import MedQA_dataset, dataset
 from eval_util import accuracy
@@ -143,43 +143,43 @@ class GeneratorModel:
 
             output_str = response.choices[0].message.content
 
-        elif self.generator_type == 'litellm':
+        # elif self.generator_type == 'litellm':
 
-            def get_reponse():
-                if self.model_name_or_path == 'together_ai/databricks/dbrx-instruct':
+            # def get_reponse():
+            #     if self.model_name_or_path == 'together_ai/databricks/dbrx-instruct':
 
-                    response = self.client.chat.completions.create(
-                        model="databricks/dbrx-instruct",
-                        messages=self.messages
-                    )
+            #         response = self.client.chat.completions.create(
+            #             model="databricks/dbrx-instruct",
+            #             messages=self.messages
+            #         )
 
-                else:
-                    # response = completion(model=self.model_name_or_path,
-                    #                     messages=self.messages,
-                    #                     temperature=self.temperature,
-                    #                     max_tokens=self.max_new_tokens
-                    #                     )
-                    response = self.client.completions.create(
-                            model=self.model_name_or_path,
-                            prompt=generator_prompt,
-                            temperature=self.temperature,
-                            max_tokens=self.max_new_tokens
-                        )
+            #     else:
+            #         # response = completion(model=self.model_name_or_path,
+            #         #                     messages=self.messages,
+            #         #                     temperature=self.temperature,
+            #         #                     max_tokens=self.max_new_tokens
+            #         #                     )
+            #         response = self.client.completions.create(
+            #                 model=self.model_name_or_path,
+            #                 prompt=generator_prompt,
+            #                 temperature=self.temperature,
+            #                 max_tokens=self.max_new_tokens
+            #             )
                                             
-                return response
+            #     return response
 
-            try:
-                response = get_reponse()
-            except BadRequestError as e:
-                error_message = str(e)
-                if 'Input validation error' in error_message:
-                    self.reset_messages()
-                    print('Prompt + conversation history > maximal context length of the model --> memory resetted.')
-                    # Resend the query
-                    response = get_reponse()
+            # try:
+            #     response = get_reponse()
+            # except BadRequestError as e:
+            #     error_message = str(e)
+            #     if 'Input validation error' in error_message:
+            #         self.reset_messages()
+            #         print('Prompt + conversation history > maximal context length of the model --> memory resetted.')
+            #         # Resend the query
+            #         response = get_reponse()
 
             # output_str = response.choices[0].message.content
-            output_str = response.choices[0].text
+            # output_str = response.choices[0].text
             
         elif self.generator_type == 'local':
 

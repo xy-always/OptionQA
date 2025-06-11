@@ -346,7 +346,7 @@ class Benchmark:
         }
         return response
 
-    def generate_responses(self, generator_model):
+    def generate_responses(self, generator_model, output_file):
         response_dict_list = []
         for d in self.test_data:
             question_str = d['question']
@@ -355,7 +355,14 @@ class Benchmark:
             print(f'Question {question_id} / {len(self.test_data)} completed')
             response = self.generate_responses_for_question(generator_model, question_str, answer_icliniq)
             response_dict_list.append(response)
-
+            if len(response_dict_list) % 2 == 0:
+                with open(output_file, 'w', encoding='utf-8') as f:
+                    json.dump(response_dict_list, f, ensure_ascii=False, indent=4)
+            # 最后一次写入在函数外部完成
+        # Write the final responses to the output file
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(response_dict_list, f, ensure_ascii=False, indent=4)
+        print(f'Responses saved to {output_file}')
         return response_dict_list
 
 def load_from_json(file_path):
@@ -366,7 +373,7 @@ def load_from_json(file_path):
         return None  # or raise an exception if the file is expected to exist
 
 class Experiment:
-    def __init__(self, data_dir, generator_model_name_or_path, generator_type, evaluator_model_name_or_path, device, max_context_window, dataset_name, generator_model=None):
+    def __init__(self, data_dir, generator_model_name_or_path, generator_type, evaluator_model_name_or_path, device, max_context_window, dataset_name, output_file, generator_model=None):
 
         self.data_dir = data_dir
         
@@ -377,6 +384,7 @@ class Experiment:
         self.device = device
         self.dataset_name = dataset_name
         self.benchmark = Benchmark(self.data_dir, self.dataset_name)
+        self.output_file = output_file
 
         if generator_model == None:
             if dataset_name == 'icliniq':
@@ -397,8 +405,8 @@ class Experiment:
         # self.evaluator_model = EvaluatorModel(model=self.evaluator_model_name_or_path)
 
 
-    def generate(self):
-        self.response = self.benchmark.generate_responses(self.generator_model)
+    def generate(self, output_file=None):
+        self.response = self.benchmark.generate_responses(self.generator_model, output_file=self.output_file)
         # print('response:', self.response)
         return(True)
 
@@ -468,6 +476,10 @@ def main():
     device = args.device
     max_context_window = args.max_context_window
     dataset_name = args.dataset_name
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    model_name = generator_model_name_or_path.split('/')[-1]
+    output_file = os.path.join(output_dir, model_name + '_responses.json')
     parameter_list = []
     parameter_list.append(['Data Directory', data_dir])
     parameter_list.append(['Output Directory', output_dir])
@@ -489,6 +501,7 @@ def main():
 
  
     torch.cuda.empty_cache()
+    
 
     experiment = Experiment(data_dir=data_dir,
                             generator_model_name_or_path=generator_model_name_or_path,
@@ -496,14 +509,10 @@ def main():
                             evaluator_model_name_or_path=evaluator_model_name_or_path,
                             device=device,
                             max_context_window=max_context_window,
-                            dataset_name=dataset_name)
+                            dataset_name=dataset_name,
+                            output_file=output_file)
     response, evaluation_results = experiment.run()
 
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    model_name = generator_model_name_or_path.split('/')[-1]
-    with open(os.path.join(output_dir, model_name + '_responses.json'), 'w') as f:
-        json.dump(response, f, indent=4)
 
     print('evaluation_results:', evaluation_results)
         
