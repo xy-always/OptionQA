@@ -355,7 +355,7 @@ class Benchmark:
             print(f'Question {question_id} / {len(self.test_data)} completed')
             response = self.generate_responses_for_question(generator_model, question_str, answer_icliniq)
             response_dict_list.append(response)
-            if len(response_dict_list) % 2 == 0:
+            if len(response_dict_list) % 20 == 0:
                 with open(output_file, 'w', encoding='utf-8') as f:
                     json.dump(response_dict_list, f, ensure_ascii=False, indent=4)
             # 最后一次写入在函数外部完成
